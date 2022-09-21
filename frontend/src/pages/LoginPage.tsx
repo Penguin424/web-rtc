@@ -4,7 +4,7 @@ import logo from "../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const { online, dispatch } = useContext(GlobalProviderContext);
+  const { online, dispatch, socketIo } = useContext(GlobalProviderContext);
   const [username, setUsername] = useState("");
 
   const navigation = useNavigate();
@@ -17,6 +17,11 @@ const LoginPage = () => {
         type: "DASHBOARD.SET_USERNAME",
         payload: username,
       });
+
+    socketIo?.emit("register-new-user", {
+      username,
+      socketId: socketIo.id,
+    });
 
     navigation("/dashboard");
   };
