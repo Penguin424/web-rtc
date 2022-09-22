@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
+import { GlobalProviderContext } from "../providers/GlobalProvider";
 import { IActiveUSers } from "../reducers/@types";
+import useWebRTCHandler from "../hooks/useWebRTCHanlder";
 
 interface IPropsActiveUserItemComponent {
   activeUser: IActiveUSers;
@@ -8,8 +10,21 @@ interface IPropsActiveUserItemComponent {
 const ActiveUserItemComponent = ({
   activeUser,
 }: IPropsActiveUserItemComponent) => {
+  const { socketIo, dispatch, globalstate } = useContext(GlobalProviderContext);
+  const { callToOtherUser } = useWebRTCHandler();
+
+  const handleListItemPressed = () => {
+    if (dispatch && socketIo)
+      callToOtherUser(
+        activeUser
+        // dispatch,
+        // socketIo,
+        // globalstate?.userName!
+      );
+  };
+
   return (
-    <div className="active_user_list_item">
+    <div className="active_user_list_item" onClick={handleListItemPressed}>
       <div className="active_user_list_image_container">
         <img
           className="active_user_list_image"

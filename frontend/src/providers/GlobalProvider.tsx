@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { createContext, useEffect, useReducer } from "react";
 import { Socket } from "socket.io-client";
 import { useSocket } from "../hooks/useSocket";
@@ -7,7 +8,6 @@ import {
   GlobalReducer,
   GlobalState,
 } from "../reducers/GlobalReducer";
-import { handleStateEventsSockets } from "../utils/socketEvents";
 
 export const brodcastEvents = {
   ACTIVE_USERS: "ACTIVE_USERS",
@@ -29,6 +29,13 @@ export const GlobalProviderContext = createContext<IGlobalContextData>({
     localStream: null,
     activeUsers: [],
     userName: "",
+    callStates: "CALL_AVAILABLE",
+    callingDialogVisible: false,
+    callerUsername: "",
+    callRejected: {
+      rejected: false,
+      reason: "",
+    },
   },
 });
 
@@ -38,8 +45,8 @@ const GlobalProvider = ({ children }: any) => {
   const [globalstate, dispatch] = useReducer(GlobalReducer, GlobalState);
 
   useEffect(() => {
-    handleStateEventsSockets(socketIo, dispatch);
-  }, [socketIo]);
+    console.log("GlobalProvider useEffect", globalstate);
+  }, [globalstate]);
 
   return (
     <GlobalProviderContext.Provider

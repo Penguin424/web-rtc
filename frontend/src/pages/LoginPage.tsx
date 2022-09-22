@@ -2,26 +2,25 @@ import { useContext, useState } from "react";
 import { GlobalProviderContext } from "../providers/GlobalProvider";
 import logo from "../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUserName } from "../stores/GlobalSlice";
 
 const LoginPage = () => {
-  const { online, dispatch, socketIo } = useContext(GlobalProviderContext);
+  const { socketIo } = useContext(GlobalProviderContext);
   const [username, setUsername] = useState("");
 
   const navigation = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (dispatch)
-      dispatch({
-        type: "DASHBOARD.SET_USERNAME",
-        payload: username,
-      });
 
     socketIo?.emit("register-new-user", {
       username,
       socketId: socketIo.id,
     });
+
+    dispatch(addUserName(username));
 
     navigation("/dashboard");
   };

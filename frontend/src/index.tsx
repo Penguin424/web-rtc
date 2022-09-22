@@ -6,20 +6,24 @@ import reportWebVitals from "./reportWebVitals";
 import LoginPage from "./pages/LoginPage";
 import GlobalProvider from "./providers/GlobalProvider";
 import DashBoardPage from "./pages/DashBoardPage";
+import { Provider } from "react-redux";
+import { globalStore } from "./stores/GlobalStore";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   // <React.StrictMode>
-  <GlobalProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashBoardPage />} />
-      </Routes>
-    </BrowserRouter>
-  </GlobalProvider>
+  <Provider store={globalStore}>
+    <GlobalProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/dashboard" element={<DashBoardPage />} />
+        </Routes>
+      </BrowserRouter>
+    </GlobalProvider>
+  </Provider>
   // </React.StrictMode>
 );
 

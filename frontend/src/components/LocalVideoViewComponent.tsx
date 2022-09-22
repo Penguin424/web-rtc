@@ -1,22 +1,41 @@
-import { useContext, useEffect, useRef } from "react";
-import { GlobalProviderContext } from "../providers/GlobalProvider";
+import { useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { IGlobalState } from "../reducers/@types";
 
 const LocalVideoViewComponent = () => {
-  const { globalstate } = useContext(GlobalProviderContext);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const globalState: IGlobalState = useSelector((state: any) => state.global);
 
   useEffect(() => {
-    if (globalstate?.localStream) {
-      const localVideo = localVideoRef.current;
-      if (localVideo) {
-        localVideo?.srcObject = globalstate.localStream;
-      }
+    const localVideo = localVideoRef.current;
+    if (localVideo !== null) {
+      localVideo.srcObject = globalState.localStream;
+
+      localVideo.onloadedmetadata = () => {
+        localVideo.play();
+      };
     }
-  }, [globalstate?.localStream]);
+  }, [globalState]);
 
   return (
-    <div>
-      <video ref={localVideoRef}></video>
+    <div
+      style={{
+        width: "150px",
+        height: "150px",
+        borderRadius: "8px",
+        position: "absolute",
+        top: "5%",
+        right: "23%",
+      }}
+      className="background_secondary_color"
+    >
+      <video
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        ref={localVideoRef}
+      ></video>
     </div>
   );
 };
