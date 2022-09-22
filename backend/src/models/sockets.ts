@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { brodcastEvents, IPeerNewUser } from "../@types";
+import { brodcastEvents, IPeerNewUser, IPreofferAnswerData, IPreofferData } from "../@types";
 
 class Sockets {
   io: Server;
@@ -31,11 +31,24 @@ class Sockets {
           event: brodcastEvents.ACTIVE_USERS,
           data: this.peers,
         });
-
-        console.log(this.peers);
       });
 
-      console.log("Client connected", socket.id);
+      socket.on("pre-offer", (data: IPreofferData) => {
+        console.log("pre-offer", data);
+
+        this.io.to(data.calee.socket).emit("pre-offer", {
+          callerUsername: data.caller.username,
+          callerSocket: socket.id,
+        });
+      });
+
+      socket.on("pre-offer-answer", (data: IPreofferAnswerData) => {
+        console.log("pre-offer-answer", data);
+
+        this.io.to(data.callerSocket).emit("pre-offer-answer", {
+          answer: data.answer,
+        });
+      });
     });
   }
 }
