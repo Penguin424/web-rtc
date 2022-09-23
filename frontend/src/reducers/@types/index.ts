@@ -18,6 +18,11 @@ export interface IGlobalState {
     rejected: boolean;
     reason: string;
   };
+  connectedUserSocketId: string;
+  peerConnection: RTCPeerConnection | null;
+  configuration: {
+    iceServers: { urls: string }[];
+  };
 }
 
 export const preOfferAnswers = {

@@ -1,7 +1,13 @@
 import React, { useContext } from "react";
+
+import { IActiveUSers, IGlobalState } from "../reducers/@types";
+import { useDispatch, useSelector } from "react-redux";
 import { GlobalProviderContext } from "../providers/GlobalProvider";
-import { IActiveUSers } from "../reducers/@types";
-import useWebRTCHandler from "../hooks/useWebRTCHanlder";
+import {
+  addCallingDialogVisible,
+  addCallState,
+  addConnectedUserSocketId,
+} from "../stores/GlobalSlice";
 
 interface IPropsActiveUserItemComponent {
   activeUser: IActiveUSers;
@@ -10,17 +16,42 @@ interface IPropsActiveUserItemComponent {
 const ActiveUserItemComponent = ({
   activeUser,
 }: IPropsActiveUserItemComponent) => {
-  const { socketIo, dispatch, globalstate } = useContext(GlobalProviderContext);
-  const { callToOtherUser } = useWebRTCHandler();
+  const { socketIo } = useContext(GlobalProviderContext);
+  const dispatch = useDispatch();
+  const globalState: IGlobalState = useSelector((state: any) => state.global);
 
   const handleListItemPressed = () => {
-    if (dispatch && socketIo)
-      callToOtherUser(
-        activeUser
-        // dispatch,
-        // socketIo,
-        // globalstate?.userName!
-      );
+    // callToOtherUser(
+    //   activeUser
+    //   // dispatch,
+    //   // socketIo,
+    //   // globalstate?.userName!
+    // );
+
+    if (socketIo) {
+      // dispatch({
+      //   type: "CALL.SET_CALL_STATE",
+      //   payload: "CALL_IN_PROGRESS",
+      // });
+
+      // dispatch({
+      //   type: "CALL.SET_DIALOG_VISIBLE",
+      //   payload: true,
+      // });
+
+      dispatch(addCallState("CALL_IN_PROGRESS"));
+      dispatch(addCallingDialogVisible(true));
+      dispatch(addConnectedUserSocketId(activeUser.socket));
+
+      let dataPreOffer = {
+        calee: activeUser,
+        caller: {
+          username: globalState.userName,
+        },
+      };
+
+      socketIo.emit("pre-offer", dataPreOffer);
+    }
   };
 
   return (

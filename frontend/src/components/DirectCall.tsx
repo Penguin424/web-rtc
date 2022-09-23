@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
-import { GlobalProviderContext } from "../providers/GlobalProvider";
+import { useSelector } from "react-redux";
+
+import { IGlobalState } from "../reducers/@types";
 import CallingDialogComponent from "./CallingDialogComponent";
 import CallRejectedDialog from "./CallRejectedDialog";
 import IncomingCallDialog from "./IncomingCallDialog";
@@ -11,17 +12,17 @@ interface IPropsDirectCall {
 }
 
 const DirectCall = ({ remoteStream }: IPropsDirectCall) => {
-  const { globalstate } = useContext(GlobalProviderContext);
+  const globalState: IGlobalState = useSelector((state: any) => state.global);
 
   return (
     <>
       <LocalVideoViewComponent />
       {remoteStream && <RemoteVideoViewComponent remoteStream={remoteStream} />}
-      {globalstate?.callRejected.rejected && <CallRejectedDialog />}
-      {globalstate?.callStates === "CALL_REQUESTED" && (
-        <IncomingCallDialog callerUsername={globalstate?.callerUsername} />
+      {globalState?.callRejected.rejected && <CallRejectedDialog />}
+      {globalState?.callStates === "CALL_REQUESTED" && (
+        <IncomingCallDialog callerUsername={globalState?.callerUsername} />
       )}
-      {globalstate?.callingDialogVisible && <CallingDialogComponent />}
+      {globalState?.callingDialogVisible && <CallingDialogComponent />}
     </>
   );
 };

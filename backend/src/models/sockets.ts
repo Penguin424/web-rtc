@@ -1,5 +1,12 @@
 import { Server, Socket } from "socket.io";
-import { brodcastEvents, IPeerNewUser, IPreofferAnswerData, IPreofferData } from "../@types";
+import {
+  brodcastEvents,
+  IPeerNewUser,
+  IPreofferAnswerData,
+  IPreofferData,
+  IWebRTCCandidateData,
+  IWebRTCOfferData,
+} from "../@types";
 
 class Sockets {
   io: Server;
@@ -43,10 +50,31 @@ class Sockets {
       });
 
       socket.on("pre-offer-answer", (data: IPreofferAnswerData) => {
-        console.log("pre-offer-answer", data);
-
         this.io.to(data.callerSocket).emit("pre-offer-answer", {
           answer: data.answer,
+        });
+      });
+
+      socket.on("webRTC-offer", (data: IWebRTCOfferData) => {
+        console.log("webRTC-offer", data);
+        this.io.to(data.calleeSocket).emit("webRTC-offer", {
+          callerSocket: socket.id,
+          offer: data.offer,
+        });
+      });
+
+      socket.on("webRTC-answer", (data: any) => {
+        console.log("webRTC-answer", data);
+        this.io.to(data.calleeSocket).emit("webRTC-answer", {
+          answer: data.answer,
+        });
+      });
+
+      socket.on("webRTC-candidate", (data: IWebRTCCandidateData) => {
+        console.log("webRTC-candidate", data);
+
+        this.io.to(data.socket).emit("webRTC-candidate", {
+          candidate: data.candidate,
         });
       });
     });

@@ -1,16 +1,52 @@
-import useWebRTCHandler from "../hooks/useWebRTCHanlder";
+import { useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { GlobalProviderContext } from "../providers/GlobalProvider";
+import { IGlobalState, preOfferAnswers } from "../reducers/@types";
+import {
+  addCallingDialogVisible,
+  addCallState,
+  addConnectedUserSocketId,
+} from "../stores/GlobalSlice";
 
 interface IPropsIncomingCallDialog {
   callerUsername: string;
 }
 
 const IncomingCallDialog = ({ callerUsername }: IPropsIncomingCallDialog) => {
-  const { rejectIncomingCallRequest } = useWebRTCHandler();
+  const { socketIo } = useContext(GlobalProviderContext);
+  const dispatch = useDispatch();
+  const globalState: IGlobalState = useSelector((state: any) => state.global);
 
-  const handleAcceptButtonPress = () => {};
+  const handleAcceptButtonPress = () => {
+    // acceptIncomingCallRequest();
+
+    console.log("handleAcceptButtonPress", globalState);
+
+    console.log("accept button pressed", globalState.connectedUserSocketId);
+
+    socketIo?.emit("pre-offer-answer", {
+      callerSocket: globalState.connectedUserSocketId,
+      answer: preOfferAnswers.CALL_ACCEPTED,
+    });
+  };
 
   const handleRejectButtonPress = () => {
-    rejectIncomingCallRequest();
+    // rejectIncomingCallRequest(globalState.connectedUserSocketId);
+
+    console.log("rejectIncomingCallRequest", globalState.connectedUserSocketId);
+
+    socketIo?.emit("pre-offer-answer", {
+      callerSocket: globalState.connectedUserSocketId,
+      answer: preOfferAnswers.CALL_REJECTED,
+    });
+
+    resetCallData();
+  };
+
+  const resetCallData = () => {
+    dispatch(addCallState("CALL_AVAILABLE"));
+    dispatch(addCallingDialogVisible(false));
+    dispatch(addConnectedUserSocketId(""));
   };
 
   return (

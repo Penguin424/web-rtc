@@ -1,16 +1,36 @@
-import { Socket } from "socket.io-client";
-import { ActonType } from "../reducers/GlobalReducer";
-import { IActiveUSers, preOfferAnswers } from "../reducers/@types";
-import { IPreOfferDataOn } from "../@types";
-import { useContext, useEffect } from "react";
+import {
+  IActiveUSers,
+  IGlobalState,
+  preOfferAnswers,
+} from "../reducers/@types";
+import { IPreAnswerDataOn, IPreOfferDataOn } from "../@types";
+import { Dispatch, useContext, useEffect } from "react";
 import { GlobalProviderContext } from "../providers/GlobalProvider";
 
-const useWebRTCHandler = () => {
-  const { socketIo, globalstate, dispatch } = useContext(GlobalProviderContext);
+import {
+  addCallerUsername,
+  addCallingDialogVisible,
+  addCallRejected,
+  addCallState,
+  addConnectedUserSocketId,
+  addPeerConnection,
+} from "../stores/GlobalSlice";
+import { AnyAction } from "redux";
 
-  useEffect(() => {}, [globalstate]);
+interface IPropsUseWebRTCHandler {
+  globalState: IGlobalState;
+  dispatch: Dispatch<AnyAction>;
+}
 
-  let connectedUserSocketId: string;
+const useWebRTCHandler = ({
+  globalState,
+  dispatch,
+}: IPropsUseWebRTCHandler) => {
+  const { socketIo } = useContext(GlobalProviderContext);
+
+  // const globalState: IGlobalState = useSelector((state: any) => state.global);
+
+  // let connectedUserSocketId: string;
 
   const getLocalStream = async (): Promise<MediaStream | undefined> => {
     try {
@@ -25,27 +45,56 @@ const useWebRTCHandler = () => {
     }
   };
 
-  const callToOtherUser = (
-    caleeDetails: IActiveUSers
-    // dispatch: React.Dispatch<ActonType>,
-    // socket: Socket,
-    // username: string
-  ) => {
-    if (socketIo && dispatch && globalstate) {
-      dispatch({
-        type: "CALL.SET_CALL_STATE",
-        payload: "CALL_IN_PROGRESS",
-      });
+  const createPeerConnection = () => {
+    dispatch(
+      addPeerConnection(new RTCPeerConnection(globalState.configuration))
+    );
 
-      dispatch({
-        type: "CALL.SET_DIALOG_VISIBLE",
-        payload: true,
-      });
+    const localStream = globalState.localStream;
+
+    if (localStream) {
+      for (const track of localStream?.getTracks()) {
+        globalState.peerConnection?.addTrack(track, localStream);
+      }
+    }
+
+    if (globalState.peerConnection) {
+      globalState.peerConnection.ontrack = ({ streams: [stream] }) => {};
+
+      globalState.peerConnection.onicecandidate = (event) => {
+        console.log("onicecandidate", event);
+
+        if (event.candidate) {
+          const data = {
+            candidate: event.candidate,
+            socket: globalState.connectedUserSocketId,
+          };
+
+          socketIo?.emit("webRTC-candidate", data);
+        }
+      };
+    }
+  };
+
+  const callToOtherUser = (caleeDetails: IActiveUSers) => {
+    if (socketIo) {
+      // dispatch({
+      //   type: "CALL.SET_CALL_STATE",
+      //   payload: "CALL_IN_PROGRESS",
+      // });
+
+      // dispatch({
+      //   type: "CALL.SET_DIALOG_VISIBLE",
+      //   payload: true,
+      // });
+
+      dispatch(addCallState("CALL_IN_PROGRESS"));
+      dispatch(addCallingDialogVisible(true));
 
       let dataPreOffer = {
         calee: caleeDetails,
         caller: {
-          username: globalstate.userName,
+          username: globalState.userName,
         },
       };
 
@@ -57,25 +106,25 @@ const useWebRTCHandler = () => {
     caleeDetails: IPreOfferDataOn
     // dispatch: React.Dispatch<ActonType>
   ) => {
-    if (dispatch) {
-      dispatch!({
-        type: "CALL.SET_CALLER_USERNAME",
-        payload: caleeDetails.callerUsername,
-      });
-    }
+    dispatch(addCallerUsername(caleeDetails.callerUsername));
 
     if (checkIfCallIsPossible()) {
-      connectedUserSocketId = caleeDetails.callerSocket;
+      console.log("call is possible", caleeDetails);
 
-      dispatch!({
-        type: "CALL.SET_CALLER_USERNAME",
-        payload: caleeDetails.callerUsername,
-      });
+      dispatch(addConnectedUserSocketId(caleeDetails.callerSocket));
 
-      dispatch!({
-        type: "CALL.SET_CALL_STATE",
-        payload: "CALL_REQUESTED",
-      });
+      // dispatch!({
+      //   type: "CALL.SET_CALLER_USERNAME",
+      //   payload: caleeDetails.callerUsername,
+      // });
+
+      // dispatch!({
+      //   type: "CALL.SET_CALL_STATE",
+      //   payload: "CALL_REQUESTED",
+      // });
+
+      dispatch(addCallerUsername(caleeDetails.callerUsername));
+      dispatch(addCallState("CALL_REQUESTED"));
     } else {
       socketIo?.emit("pre-offer-answer", {
         callerSocket: caleeDetails.callerSocket,
@@ -84,14 +133,18 @@ const useWebRTCHandler = () => {
     }
   };
 
-  const acceptIncomingCallRequest = () => {
+  const acceptIncomingCallRequest = (connectedUserSocketId: string) => {
+    console.log("accept button pressed", connectedUserSocketId);
+
     socketIo?.emit("pre-offer-answer", {
       callerSocket: connectedUserSocketId,
       answer: preOfferAnswers.CALL_ACCEPTED,
     });
   };
 
-  const rejectIncomingCallRequest = () => {
+  const rejectIncomingCallRequest = (connectedUserSocketId: string) => {
+    console.log("rejectIncomingCallRequest", connectedUserSocketId);
+
     socketIo?.emit("pre-offer-answer", {
       callerSocket: connectedUserSocketId,
       answer: preOfferAnswers.CALL_REJECTED,
@@ -101,14 +154,14 @@ const useWebRTCHandler = () => {
   };
 
   const checkIfCallIsPossible = () => {
-    dispatch!({
-      type: "DASHBOARD.SET_USERNAME",
-      payload: globalstate?.userName,
-    });
+    // dispatch!({
+    //   type: "DASHBOARD.SET_USERNAME",
+    //   payload: globalstate?.userName,
+    // });
 
     if (
-      globalstate!.localStream === null ||
-      globalstate!.callStates !== "CALL_AVAILABLE"
+      globalState.localStream === null ||
+      globalState.callStates !== "CALL_AVAILABLE"
     ) {
       return false;
     } else {
@@ -117,21 +170,24 @@ const useWebRTCHandler = () => {
   };
 
   const resetCallData = () => {
-    connectedUserSocketId = "";
+    // dispatch!({
+    //   type: "CALL.SET_CALL_STATE",
+    //   payload: "CALL_AVAILABLE",
+    // });
 
-    dispatch!({
-      type: "CALL.SET_CALL_STATE",
-      payload: "CALL_AVAILABLE",
-    });
+    // dispatch!({
+    //   type: "CALL.SET_DIALOG_VISIBLE",
+    //   payload: false,
+    // });
 
-    dispatch!({
-      type: "CALL.SET_DIALOG_VISIBLE",
-      payload: false,
-    });
+    dispatch(addCallState("CALL_AVAILABLE"));
+    dispatch(addCallingDialogVisible(false));
+    dispatch(addConnectedUserSocketId(""));
   };
 
-  const handlePreOfferAnswer = (data: { answer: string }) => {
+  const handlePreOfferAnswer = (data: { socket: string; answer: string }) => {
     if (data.answer === preOfferAnswers.CALL_ACCEPTED) {
+      sendOffer(data);
     } else {
       let rejectionReason = "";
 
@@ -141,16 +197,49 @@ const useWebRTCHandler = () => {
         rejectionReason = "User rejected your call";
       }
 
-      dispatch!({
-        type: "CALL.SET_CALL_REJECTED",
-        payload: {
-          rejected: true,
-          reason: rejectionReason,
-        },
-      });
+      // dispatch!({
+      //   type: "CALL.SET_CALL_REJECTED",
+      //   payload: {
+      //     rejected: true,
+      //     reason: rejectionReason,
+      //   },
+      // });
+
+      dispatch(addCallRejected({ rejected: true, reason: rejectionReason }));
 
       resetCallData();
     }
+  };
+
+  const sendOffer = async (data: { socket: string; answer: string }) => {
+    const offer = await globalState.peerConnection?.createOffer();
+    await globalState.peerConnection?.setLocalDescription(offer);
+
+    console.log("asdasdg", data);
+
+    socketIo?.emit("webRTC-offer", {
+      calleeSocket: data.socket,
+      offer,
+    });
+  };
+
+  const handleOffer = async (data: IPreOfferDataOn) => {
+    await globalState.peerConnection?.setRemoteDescription(data.offer);
+    const answer = await globalState.peerConnection?.createAnswer();
+    await globalState.peerConnection?.setLocalDescription(answer);
+
+    console.log("handleOffer", data.callerSocket);
+
+    socketIo?.emit("webRTC-answer", {
+      calleeSocket: data.callerSocket,
+      answer,
+    });
+  };
+
+  const handleAnswer = async (data: IPreAnswerDataOn) => {
+    await globalState.peerConnection?.setRemoteDescription(data.answer);
+
+    console.log("handleAnswer", globalState);
   };
 
   return {
@@ -160,6 +249,9 @@ const useWebRTCHandler = () => {
     acceptIncomingCallRequest,
     rejectIncomingCallRequest,
     handlePreOfferAnswer,
+    createPeerConnection,
+    handleOffer,
+    handleAnswer,
   };
 };
 

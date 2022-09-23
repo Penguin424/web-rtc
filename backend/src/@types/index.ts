@@ -19,3 +19,13 @@ export interface IPreofferAnswerData {
   callerSocket: string;
   answer: string;
 }
+
+export interface IWebRTCOfferData {
+  calleeSocket: string;
+  offer: any;
+}
+
+export interface IWebRTCCandidateData {
+  candidate: any;
+  socket: string;
+}

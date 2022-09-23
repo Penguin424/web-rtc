@@ -1,25 +1,77 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import logo from "../assets/images/logo.png";
 import ActiveUserListComponent from "../components/ActiveUserListComponent";
 import DirectCall from "../components/DirectCall";
-import useWebRTCHandler from "../hooks/useWebRTCHanlder";
 import ViewOnline from "../components/ViewOnline";
-import { useDispatch } from "react-redux";
-import { addLocalStream } from "../stores/GlobalSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addLocalStream, addPeerConnection } from "../stores/GlobalSlice";
+import { IGlobalState } from "../reducers/@types";
+import { GlobalProviderContext } from "../providers/GlobalProvider";
 
 const DashBoardPage = () => {
-  const { getLocalStream } = useWebRTCHandler();
+  const { socketIo } = useContext(GlobalProviderContext);
+
+  const globalState: IGlobalState = useSelector((state: any) => state.global);
   const dispatch = useDispatch();
 
   useEffect(() => {
     handleInitStream();
-  }, []);
+
+    console.log("globalStatedasd", globalState);
+  }, [globalState]);
 
   const handleInitStream = async () => {
-    const stream = await getLocalStream();
+    // const stream = await getLocalStream();
 
-    dispatch(addLocalStream(stream));
+    try {
+      if (globalState.localStream === null) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true,
+        });
+
+        dispatch(addLocalStream(stream));
+        // createPeerConnection();
+
+        dispatch(
+          addPeerConnection(new RTCPeerConnection(globalState.configuration))
+        );
+      }
+
+      const localStream = globalState.localStream;
+
+      if (localStream) {
+        for (const track of localStream?.getTracks()) {
+          globalState.peerConnection?.addTrack(track, localStream);
+        }
+      }
+
+      if (globalState.peerConnection) {
+        console.log("peerConnecion", globalState.peerConnection);
+
+        globalState.peerConnection.ontrack = ({ streams: [stream] }) => {};
+
+        globalState.peerConnection.onicecandidate = (event) => {
+          console.log("onicecandidate", globalState);
+
+          if (event.candidate) {
+            const data = {
+              candidate: event.candidate,
+              socket: globalState.connectedUserSocketId,
+            };
+
+            socketIo?.emit("webRTC-candidate", globalState);
+          }
+        };
+
+        globalState.peerConnection.oniceconnectionstatechange = (event) => {
+          if (globalState.peerConnection?.connectionState === "connected") {
+            console.log("connected");
+          }
+        };
+      }
+    } catch (error) {}
   };
 
   return (

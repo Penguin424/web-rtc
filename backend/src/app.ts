@@ -34,7 +34,7 @@ class App {
     });
 
     this.initSockets();
-    this.dbConecction();
+    // this.dbConecction();
   }
 
   initSockets(): void {

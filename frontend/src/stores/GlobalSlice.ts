@@ -13,6 +13,11 @@ const initialState: IGlobalState = {
     rejected: false,
     reason: "",
   },
+  connectedUserSocketId: "",
+  peerConnection: null,
+  configuration: {
+    iceServers: [{ urls: "stun:stun.l.google.com:13902" }],
+  },
 };
 
 export const globalSlice = createSlice({
@@ -28,10 +33,37 @@ export const globalSlice = createSlice({
     addLocalStream: (state, action) => {
       state.localStream = action.payload;
     },
+    addCallState: (state, action) => {
+      state.callStates = action.payload;
+    },
+    addCallingDialogVisible: (state, action) => {
+      state.callingDialogVisible = action.payload;
+    },
+    addCallerUsername: (state, action) => {
+      state.callerUsername = action.payload;
+    },
+    addCallRejected: (state, action) => {
+      state.callRejected = action.payload;
+    },
+    addConnectedUserSocketId: (state, action) => {
+      state.connectedUserSocketId = action.payload;
+    },
+    addPeerConnection: (state, action) => {
+      state.peerConnection = action.payload;
+    },
   },
 });
 
-export const { addUserName, addActiveUsers, addLocalStream } =
-  globalSlice.actions;
+export const {
+  addUserName,
+  addActiveUsers,
+  addLocalStream,
+  addCallState,
+  addCallingDialogVisible,
+  addCallerUsername,
+  addCallRejected,
+  addConnectedUserSocketId,
+  addPeerConnection,
+} = globalSlice.actions;
 
 export default globalSlice.reducer;
