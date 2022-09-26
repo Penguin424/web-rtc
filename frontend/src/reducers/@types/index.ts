@@ -8,6 +8,7 @@ export interface IGlobalState {
   activeUsers: IActiveUSers[];
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
+  screenStream: MediaStream | null;
   callStates:
     | "CALL_UNAVAILABLE"
     | "CALL_AVAILABLE"
@@ -24,6 +25,9 @@ export interface IGlobalState {
   configuration: {
     iceServers: { urls: string }[];
   };
+  enableVideo: boolean;
+  enableAudio: boolean;
+  isSharingScreen: boolean;
 }
 
 export const preOfferAnswers = {

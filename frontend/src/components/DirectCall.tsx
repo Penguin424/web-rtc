@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { IGlobalState } from "../reducers/@types";
 import CallingDialogComponent from "./CallingDialogComponent";
 import CallRejectedDialog from "./CallRejectedDialog";
+import ConversationButtons from "./ConversationButtons";
 import IncomingCallDialog from "./IncomingCallDialog";
 import LocalVideoViewComponent from "./LocalVideoViewComponent";
 import RemoteVideoViewComponent from "./RemoteVideoViewComponent";
@@ -21,6 +22,7 @@ const DirectCall = () => {
         <IncomingCallDialog callerUsername={globalState?.callerUsername} />
       )}
       {globalState?.callingDialogVisible && <CallingDialogComponent />}
+      <ConversationButtons />
     </>
   );
 };

@@ -34,6 +34,7 @@ const LocalVideoViewComponent = () => {
           width: "100%",
           height: "100%",
         }}
+        muted={true}
         ref={localVideoRef}
       ></video>
     </div>

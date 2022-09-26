@@ -19,7 +19,6 @@ import {
   addCallRejected,
   addCallState,
   addConnectedUserSocketId,
-  addRemoteStream,
 } from "../stores/GlobalSlice";
 
 interface IDataBoradcast {
@@ -126,6 +125,8 @@ const ViewOnline = () => {
       }
     });
 
+    socketIo?.on("user-hanged-up", () => {});
+
     return () => {
       socketIo?.off("broadcast");
       socketIo?.off("pre-offer");
@@ -133,6 +134,7 @@ const ViewOnline = () => {
       socketIo?.off("webRTC-offer");
       socketIo?.off("webRTC-answer");
       socketIo?.off("webRTC-candidate");
+      socketIo?.off("user-hanged-up");
     };
   }, [globalState, socketIo, dispatch]);
 

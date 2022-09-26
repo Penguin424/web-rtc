@@ -5,6 +5,7 @@ import { IGlobalState } from "../reducers/@types";
 const initialState: IGlobalState = {
   localStream: null,
   remoteStream: null,
+  screenStream: null,
   activeUsers: [],
   userName: "",
   callStates: "CALL_AVAILABLE",
@@ -19,6 +20,9 @@ const initialState: IGlobalState = {
   configuration: {
     iceServers: [{ urls: "stun:stun.l.google.com:13902" }],
   },
+  enableVideo: true,
+  enableAudio: true,
+  isSharingScreen: false,
 };
 
 export const globalSlice = createSlice({
@@ -57,6 +61,18 @@ export const globalSlice = createSlice({
     addPeerConnection: (state, action) => {
       state.peerConnection = action.payload;
     },
+    addEnableVideo: (state, action) => {
+      state.enableVideo = action.payload;
+    },
+    addEnableAudio: (state, action) => {
+      state.enableAudio = action.payload;
+    },
+    addIsSharingScreen: (state, action) => {
+      state.isSharingScreen = action.payload;
+    },
+    addScreenStream: (state, action) => {
+      state.screenStream = action.payload;
+    },
   },
 });
 
@@ -71,6 +87,10 @@ export const {
   addCallRejected,
   addConnectedUserSocketId,
   addPeerConnection,
+  addEnableVideo,
+  addEnableAudio,
+  addIsSharingScreen,
+  addScreenStream,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

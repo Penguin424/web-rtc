@@ -20,7 +20,7 @@ export const GlobalProviderContext = createContext<IGlobalContextData>({
 
 // const endpointserver = "http://localhost:3001";
 const GlobalProvider = ({ children }: any) => {
-  const { socketIo, online } = useSocket("http://192.168.100.99:3001");
+  const { socketIo, online } = useSocket("localhost:3001");
   // const [globalstate, dispatch] = useReducer(GlobalReducer, GlobalState);
 
   // useEffect(() => {

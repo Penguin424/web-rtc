@@ -77,6 +77,12 @@ class Sockets {
           candidate: data.candidate,
         });
       });
+
+      socket.on("user-hanged-up", (data: { socket: string }) => {
+        console.log("user-hanged-up", data);
+
+        this.io.to(data.socket).emit("user-hanged-up");
+      });
     });
   }
 }
