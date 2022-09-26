@@ -10,6 +10,7 @@ const RemoteVideoViewComponent = ({
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    alert("remoteStream changed");
     const remoteVideo = remoteVideoRef.current;
     if (remoteVideo !== null) {
       remoteVideo.srcObject = remoteStream;
@@ -26,7 +27,7 @@ const RemoteVideoViewComponent = ({
         width: "100%",
         height: "100%",
       }}
-      className="background_secondary_color"
+      className="background_primary_color"
     >
       <video
         style={{

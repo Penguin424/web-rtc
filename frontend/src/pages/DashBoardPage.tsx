@@ -5,7 +5,11 @@ import ActiveUserListComponent from "../components/ActiveUserListComponent";
 import DirectCall from "../components/DirectCall";
 import ViewOnline from "../components/ViewOnline";
 import { useDispatch, useSelector } from "react-redux";
-import { addLocalStream, addPeerConnection } from "../stores/GlobalSlice";
+import {
+  addLocalStream,
+  addPeerConnection,
+  addRemoteStream,
+} from "../stores/GlobalSlice";
 import { IGlobalState } from "../reducers/@types";
 import { GlobalProviderContext } from "../providers/GlobalProvider";
 
@@ -16,12 +20,12 @@ const DashBoardPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    handleInitStream();
+    handleInitStream(globalState.connectedUserSocketId);
 
-    console.log("globalStatedasd", globalState);
+    console.log("globalState use", globalState);
   }, [globalState]);
 
-  const handleInitStream = async () => {
+  const handleInitStream = async (id: string) => {
     // const stream = await getLocalStream();
 
     try {
@@ -48,20 +52,20 @@ const DashBoardPage = () => {
       }
 
       if (globalState.peerConnection) {
-        console.log("peerConnecion", globalState.peerConnection);
-
-        globalState.peerConnection.ontrack = ({ streams: [stream] }) => {};
+        globalState.peerConnection.ontrack = ({ streams: [stream] }) => {
+          dispatch(addRemoteStream(stream));
+        };
 
         globalState.peerConnection.onicecandidate = (event) => {
-          console.log("onicecandidate", globalState);
+          console.log("geeting ice candidate", event);
 
           if (event.candidate) {
             const data = {
               candidate: event.candidate,
-              socket: globalState.connectedUserSocketId,
+              socket: sessionStorage.getItem("socketid"),
             };
 
-            socketIo?.emit("webRTC-candidate", globalState);
+            socketIo?.emit("webRTC-candidate", data);
           }
         };
 

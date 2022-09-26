@@ -4,6 +4,7 @@ import { IGlobalState } from "../reducers/@types";
 
 const initialState: IGlobalState = {
   localStream: null,
+  remoteStream: null,
   activeUsers: [],
   userName: "",
   callStates: "CALL_AVAILABLE",
@@ -33,6 +34,9 @@ export const globalSlice = createSlice({
     addLocalStream: (state, action) => {
       state.localStream = action.payload;
     },
+    addRemoteStream: (state, action) => {
+      state.remoteStream = action.payload;
+    },
     addCallState: (state, action) => {
       state.callStates = action.payload;
     },
@@ -46,6 +50,8 @@ export const globalSlice = createSlice({
       state.callRejected = action.payload;
     },
     addConnectedUserSocketId: (state, action) => {
+      sessionStorage.setItem("socketid", action.payload);
+
       state.connectedUserSocketId = action.payload;
     },
     addPeerConnection: (state, action) => {
@@ -58,6 +64,7 @@ export const {
   addUserName,
   addActiveUsers,
   addLocalStream,
+  addRemoteStream,
   addCallState,
   addCallingDialogVisible,
   addCallerUsername,

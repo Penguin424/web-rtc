@@ -19,6 +19,7 @@ import {
   addCallRejected,
   addCallState,
   addConnectedUserSocketId,
+  addRemoteStream,
 } from "../stores/GlobalSlice";
 
 interface IDataBoradcast {
@@ -66,8 +67,7 @@ const ViewOnline = () => {
     socketIo?.on(
       "pre-offer-answer",
       (data: { socket: string; answer: string }) => {
-        console.log("pre-offer-answer", data);
-        // handlePreOfferAnswer(data);
+        dispatch(addCallingDialogVisible(false));
 
         if (data.answer === preOfferAnswers.CALL_ACCEPTED) {
           sendOffer(data);
@@ -118,9 +118,9 @@ const ViewOnline = () => {
 
     socketIo?.on("webRTC-candidate", async (data: IPreCandidateDataOn) => {
       try {
-        console.log("adding Ice candidate");
-
         await globalState.peerConnection?.addIceCandidate(data.candidate);
+
+        console.log("adding Ice candidate", globalState);
       } catch (error) {
         console.error("Error adding received ice candidate", error);
       }
@@ -132,6 +132,7 @@ const ViewOnline = () => {
       socketIo?.off("pre-offer-answer");
       socketIo?.off("webRTC-offer");
       socketIo?.off("webRTC-answer");
+      socketIo?.off("webRTC-candidate");
     };
   }, [globalState, socketIo, dispatch]);
 

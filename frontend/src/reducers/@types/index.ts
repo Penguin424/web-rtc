@@ -7,6 +7,7 @@ export interface IGlobalState {
   userName: string;
   activeUsers: IActiveUSers[];
   localStream: MediaStream | null;
+  remoteStream: MediaStream | null;
   callStates:
     | "CALL_UNAVAILABLE"
     | "CALL_AVAILABLE"

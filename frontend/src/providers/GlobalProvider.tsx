@@ -2,7 +2,6 @@
 import { createContext } from "react";
 import { Socket } from "socket.io-client";
 import { useSocket } from "../hooks/useSocket";
-import { IGlobalState } from "../reducers/@types";
 
 export const brodcastEvents = {
   ACTIVE_USERS: "ACTIVE_USERS",
@@ -21,7 +20,7 @@ export const GlobalProviderContext = createContext<IGlobalContextData>({
 
 // const endpointserver = "http://localhost:3001";
 const GlobalProvider = ({ children }: any) => {
-  const { socketIo, online } = useSocket("http://localhost:3001");
+  const { socketIo, online } = useSocket("http://192.168.100.99:3001");
   // const [globalstate, dispatch] = useReducer(GlobalReducer, GlobalState);
 
   // useEffect(() => {

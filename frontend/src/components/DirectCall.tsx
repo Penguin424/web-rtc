@@ -7,17 +7,15 @@ import IncomingCallDialog from "./IncomingCallDialog";
 import LocalVideoViewComponent from "./LocalVideoViewComponent";
 import RemoteVideoViewComponent from "./RemoteVideoViewComponent";
 
-interface IPropsDirectCall {
-  remoteStream?: MediaStream;
-}
-
-const DirectCall = ({ remoteStream }: IPropsDirectCall) => {
+const DirectCall = () => {
   const globalState: IGlobalState = useSelector((state: any) => state.global);
 
   return (
     <>
       <LocalVideoViewComponent />
-      {remoteStream && <RemoteVideoViewComponent remoteStream={remoteStream} />}
+      {globalState.remoteStream && (
+        <RemoteVideoViewComponent remoteStream={globalState.remoteStream} />
+      )}
       {globalState?.callRejected.rejected && <CallRejectedDialog />}
       {globalState?.callStates === "CALL_REQUESTED" && (
         <IncomingCallDialog callerUsername={globalState?.callerUsername} />

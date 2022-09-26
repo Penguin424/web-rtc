@@ -18,23 +18,15 @@ const IncomingCallDialog = ({ callerUsername }: IPropsIncomingCallDialog) => {
   const globalState: IGlobalState = useSelector((state: any) => state.global);
 
   const handleAcceptButtonPress = () => {
-    // acceptIncomingCallRequest();
-
-    console.log("handleAcceptButtonPress", globalState);
-
-    console.log("accept button pressed", globalState.connectedUserSocketId);
-
     socketIo?.emit("pre-offer-answer", {
       callerSocket: globalState.connectedUserSocketId,
       answer: preOfferAnswers.CALL_ACCEPTED,
     });
+
+    dispatch(addCallState("CALL_IN_PROGRESS"));
   };
 
   const handleRejectButtonPress = () => {
-    // rejectIncomingCallRequest(globalState.connectedUserSocketId);
-
-    console.log("rejectIncomingCallRequest", globalState.connectedUserSocketId);
-
     socketIo?.emit("pre-offer-answer", {
       callerSocket: globalState.connectedUserSocketId,
       answer: preOfferAnswers.CALL_REJECTED,
